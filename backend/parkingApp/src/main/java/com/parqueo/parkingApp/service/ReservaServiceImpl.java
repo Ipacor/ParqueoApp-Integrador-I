@@ -7,46 +7,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReservaServiceImpl implements ReservaService {
 
+    private final ReservaRepository reservaRepository;
+
     @Autowired
-    private ReservaRepository reservaRepository;
+    public ReservaServiceImpl(ReservaRepository reservaRepository) {
+        this.reservaRepository = reservaRepository;
+    }
 
     @Override
-    public List<Reserva> findAll() {
+    public List<Reserva> listarReservas() {
         return reservaRepository.findAll();
     }
 
     @Override
-    public Optional<Reserva> findById(Long id) {
-        return reservaRepository.findById(id);
+    public Reserva obtenerReservaPorId(Long id) {
+        return reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada con ID: " + id));
     }
 
     @Override
-    public List<Reserva> findByUsuarioId(Long usuarioId) {
-        return reservaRepository.findByUsuarioId(usuarioId);
-    }
-
-    @Override
-    public List<Reserva> findByEstado(String estado) {
-        return reservaRepository.findByEstado(estado);
-    }
-
-    @Override
-    public Reserva save(Reserva reserva) {
+    public Reserva crearReserva(Reserva reserva) {
         return reservaRepository.save(reserva);
     }
 
     @Override
-    public void deleteById(Long id) {
+    public Reserva actualizarReserva(Long id, Reserva reservaActualizada) {
+        Reserva reservaExistente = obtenerReservaPorId(id);
+        reservaExistente.setFechaHoraInicio(reservaActualizada.getFechaHoraInicio());
+        reservaExistente.setFechaHoraFin(reservaActualizada.getFechaHoraFin());
+        reservaExistente.setEstado(reservaActualizada.getEstado());
+        // puedes actualizar también vehículo y usuario si lo deseas
+        return reservaRepository.save(reservaExistente);
+    }
+
+    @Override
+    public void eliminarReserva(Long id) {
         reservaRepository.deleteById(id);
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return reservaRepository.existsById(id);
+    public List<Reserva> listarReservasPorUsuario(Long idUsuario) {
+        return reservaRepository.findByUsuarioId(idUsuario);
     }
 }

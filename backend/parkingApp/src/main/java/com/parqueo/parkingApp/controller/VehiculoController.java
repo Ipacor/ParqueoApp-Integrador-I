@@ -3,60 +3,40 @@ package com.parqueo.parkingApp.controller;
 import com.parqueo.parkingApp.model.Vehiculo;
 import com.parqueo.parkingApp.service.VehiculoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/vehiculos")
+@CrossOrigin("*")
 public class VehiculoController {
 
     @Autowired
     private VehiculoService vehiculoService;
 
     @GetMapping
-    public List<Vehiculo> getAll() {
-        return vehiculoService.findAll();
+    public List<Vehiculo> listarVehiculos() {
+        return vehiculoService.listarVehiculos();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Vehiculo> getById(@PathVariable Long id) {
-        Optional<Vehiculo> vehiculo = vehiculoService.findById(id);
-        return vehiculo.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/usuario/{usuarioId}")
-    public List<Vehiculo> getByUsuario(@PathVariable Long usuarioId) {
-        return vehiculoService.findByUsuarioId(usuarioId);
-    }
-
-    @GetMapping("/placa/{placa}")
-    public List<Vehiculo> getByPlaca(@PathVariable String placa) {
-        return vehiculoService.findByPlaca(placa);
+    public Vehiculo obtenerVehiculo(@PathVariable Long id) {
+        return vehiculoService.obtenerVehiculoPorId(id);
     }
 
     @PostMapping
-    public Vehiculo create(@RequestBody Vehiculo vehiculo) {
-        return vehiculoService.save(vehiculo);
+    public Vehiculo crearVehiculo(@RequestBody Vehiculo vehiculo) {
+        return vehiculoService.crearVehiculo(vehiculo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Vehiculo> update(@PathVariable Long id, @RequestBody Vehiculo vehiculo) {
-        if (!vehiculoService.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        vehiculo.setId(id);
-        return ResponseEntity.ok(vehiculoService.save(vehiculo));
+    public Vehiculo actualizarVehiculo(@PathVariable Long id, @RequestBody Vehiculo vehiculo) {
+        return vehiculoService.actualizarVehiculo(id, vehiculo);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (!vehiculoService.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        vehiculoService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public void eliminarVehiculo(@PathVariable Long id) {
+        vehiculoService.eliminarVehiculo(id);
     }
 }

@@ -2,7 +2,6 @@ package com.parqueo.parkingApp.service;
 
 import com.parqueo.parkingApp.model.Sancion;
 import com.parqueo.parkingApp.repository.SancionRepository;
-import com.parqueo.parkingApp.service.SancionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,37 +15,37 @@ public class SancionServiceImpl implements SancionService {
     private SancionRepository sancionRepository;
 
     @Override
-    public List<Sancion> findAll() {
+    public List<Sancion> listarTodas() {
         return sancionRepository.findAll();
     }
 
     @Override
-    public Optional<Sancion> findById(Long id) {
+    public Optional<Sancion> buscarPorId(Long id) {
         return sancionRepository.findById(id);
     }
 
     @Override
-    public List<Sancion> findByUsuarioId(Long usuarioId) {
+    public List<Sancion> listarPorUsuarioId(Long usuarioId) {
         return sancionRepository.findByUsuarioId(usuarioId);
     }
 
     @Override
-    public List<Sancion> findByEstado(String estado) {
-        return sancionRepository.findByEstado(estado);
-    }
-
-    @Override
-    public Sancion save(Sancion sancion) {
+    public Sancion guardar(Sancion sancion) {
         return sancionRepository.save(sancion);
     }
 
     @Override
-    public void deleteById(Long id) {
-        sancionRepository.deleteById(id);
+    public Sancion actualizar(Long id, Sancion sancionActualizada) {
+        return sancionRepository.findById(id).map(s -> {
+            s.setMotivo(sancionActualizada.getMotivo());
+            s.setEstado(sancionActualizada.getEstado());
+            return sancionRepository.save(s);
+        }).orElseThrow(() -> new RuntimeException("Sanción no encontrada"));
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return sancionRepository.existsById(id);
+    public void eliminar(Long id) {
+        sancionRepository.deleteById(id);
     }
 }
+

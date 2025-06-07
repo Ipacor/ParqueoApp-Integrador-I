@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class VehiculoServiceImpl implements VehiculoService {
@@ -16,37 +15,37 @@ public class VehiculoServiceImpl implements VehiculoService {
     private VehiculoRepository vehiculoRepository;
 
     @Override
-    public List<Vehiculo> findAll() {
+    public List<Vehiculo> listarVehiculos() {
         return vehiculoRepository.findAll();
     }
 
     @Override
-    public Optional<Vehiculo> findById(Long id) {
-        return vehiculoRepository.findById(id);
+    public Vehiculo obtenerVehiculoPorId(Long id) {
+        return vehiculoRepository.findById(id).orElse(null);
     }
 
     @Override
-    public List<Vehiculo> findByUsuarioId(Long usuarioId) {
-        return vehiculoRepository.findByUsuarioId(usuarioId);
-    }
-
-    @Override
-    public List<Vehiculo> findByPlaca(String placa) {
-        return vehiculoRepository.findByPlaca(placa);
-    }
-
-    @Override
-    public Vehiculo save(Vehiculo vehiculo) {
+    public Vehiculo crearVehiculo(Vehiculo vehiculo) {
         return vehiculoRepository.save(vehiculo);
     }
 
     @Override
-    public void deleteById(Long id) {
-        vehiculoRepository.deleteById(id);
+    public Vehiculo actualizarVehiculo(Long id, Vehiculo vehiculoActualizado) {
+        Vehiculo vehiculo = vehiculoRepository.findById(id).orElse(null);
+        if (vehiculo != null) {
+            vehiculo.setPlaca(vehiculoActualizado.getPlaca());
+            vehiculo.setModelo(vehiculoActualizado.getModelo());
+            vehiculo.setMarca(vehiculoActualizado.getMarca());
+            vehiculo.setColor(vehiculoActualizado.getColor());
+            vehiculo.setTipo(vehiculoActualizado.getTipo());
+            vehiculo.setUsuario(vehiculoActualizado.getUsuario());
+            return vehiculoRepository.save(vehiculo);
+        }
+        return null;
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return vehiculoRepository.existsById(id);
+    public void eliminarVehiculo(Long id) {
+        vehiculoRepository.deleteById(id);
     }
 }

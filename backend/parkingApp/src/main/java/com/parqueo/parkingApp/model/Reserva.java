@@ -13,25 +13,46 @@ public class Reserva {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "vehiculo_id")
+    @JoinColumn(name = "vehiculo_id", nullable = false)
     private Vehiculo vehiculo;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "espacio_id")
+    @JoinColumn(name = "espacio_id", nullable = false)
     private EspacioDisponible espacio;
 
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EscaneoQR> escaneos;
 
-
+    @Column(name = "fecha_hora_inicio", nullable = false)
     private LocalDateTime fechaHoraInicio;
+
+    @Column(name = "fecha_hora_fin", nullable = false)
     private LocalDateTime fechaHoraFin;
 
+    @Column(length = 20, nullable = false)
     private String estado;
+
+    // === Constructores ===
+
+    public Reserva() {
+        // Constructor vacío requerido por JPA
+    }
+
+    public Reserva(Usuario usuario, EspacioDisponible espacio, Vehiculo vehiculo,
+                   LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, String estado) {
+        this.usuario = usuario;
+        this.espacio = espacio;
+        this.vehiculo = vehiculo;
+        this.fechaHoraInicio = fechaHoraInicio;
+        this.fechaHoraFin = fechaHoraFin;
+        this.estado = estado;
+    }
+
+    // === Getters y Setters ===
 
     public Long getId() {
         return id;
@@ -49,20 +70,20 @@ public class Reserva {
         this.usuario = usuario;
     }
 
-    public EspacioDisponible getEspacio() {
-        return espacio;
-    }
-
-    public void setEspacio(EspacioDisponible espacio) {
-        this.espacio = espacio;
-    }
-
     public Vehiculo getVehiculo() {
         return vehiculo;
     }
 
     public void setVehiculo(Vehiculo vehiculo) {
         this.vehiculo = vehiculo;
+    }
+
+    public EspacioDisponible getEspacio() {
+        return espacio;
+    }
+
+    public void setEspacio(EspacioDisponible espacio) {
+        this.espacio = espacio;
     }
 
     public LocalDateTime getFechaHoraInicio() {
@@ -89,27 +110,26 @@ public class Reserva {
         this.estado = estado;
     }
 
-
-    public Reserva() {
-        // Constructor vacío requerido por JPA
+    public Set<EscaneoQR> getEscaneos() {
+        return escaneos;
     }
 
-    public Reserva(Usuario usuario, EspacioDisponible espacio, Vehiculo vehiculo, LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, String estado) {
-        this.usuario = usuario;
-        this.espacio = espacio;
-        this.vehiculo = vehiculo;
-        this.fechaHoraInicio = fechaHoraInicio;
-        this.fechaHoraFin = fechaHoraFin;
-        this.estado = estado;
+    public void setEscaneos(Set<EscaneoQR> escaneos) {
+        this.escaneos = escaneos;
     }
+
+    // === toString ===
 
     @Override
     public String toString() {
-        return "Reserva [id=" + id + ", usuario=" + usuario + ", espacio=" + espacio + ", vehiculo=" + vehiculo
-                + ", fechaHoraInicio=" + fechaHoraInicio + ", fechaHoraFin=" + fechaHoraFin + ", estado=" + estado
-                + "]";
+        return "Reserva{" +
+                "id=" + id +
+                ", usuario=" + usuario +
+                ", vehiculo=" + vehiculo +
+                ", espacio=" + espacio +
+                ", fechaHoraInicio=" + fechaHoraInicio +
+                ", fechaHoraFin=" + fechaHoraFin +
+                ", estado='" + estado + '\'' +
+                '}';
     }
-
-    
 }
-

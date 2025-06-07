@@ -7,17 +7,16 @@ import java.util.Optional;
 
 public interface ReservaService {
 
-    List<Reserva> findAll();
+    List<Reserva> listarReservas();
 
-    Optional<Reserva> findById(Long id);
+    Reserva obtenerReservaPorId(Long id);
 
-    List<Reserva> findByUsuarioId(Long usuarioId);
+    Reserva crearReserva(Reserva reserva);
 
-    List<Reserva> findByEstado(String estado);
+    Reserva actualizarReserva(Long id, Reserva reservaActualizada);
 
-    Reserva save(Reserva reserva);
+    void eliminarReserva(Long id);
 
-    void deleteById(Long id);
-
-    boolean existsById(Long id);
+    List<Reserva> listarReservasPorUsuario(Long idUsuario);
 }
+

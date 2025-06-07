@@ -3,9 +3,8 @@ package com.parqueo.parkingApp.controller;
 import com.parqueo.parkingApp.model.Sancion;
 import com.parqueo.parkingApp.service.SancionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -17,47 +16,39 @@ public class SancionController {
     private SancionService sancionService;
 
     @GetMapping
-    public List<Sancion> getAll() {
-        return sancionService.findAll();
+    public List<Sancion> obtenerTodas() {
+        return sancionService.listarTodas();
     }
 
     @GetMapping("/{id}")
-    public Sancion getById(@PathVariable Long id) {
-        return sancionService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sancion no encontrada"));
+    public ResponseEntity<Sancion> obtenerPorId(@PathVariable Long id) {
+        return sancionService.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public List<Sancion> getByUsuarioId(@PathVariable Long usuarioId) {
-        return sancionService.findByUsuarioId(usuarioId);
-    }
-
-    @GetMapping("/estado/{estado}")
-    public List<Sancion> getByEstado(@PathVariable String estado) {
-        return sancionService.findByEstado(estado);
+    public List<Sancion> obtenerPorUsuario(@PathVariable Long usuarioId) {
+        return sancionService.listarPorUsuarioId(usuarioId);
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Sancion create(@RequestBody Sancion sancion) {
-        return sancionService.save(sancion);
+    public Sancion crear(@RequestBody Sancion sancion) {
+        return sancionService.guardar(sancion);
     }
 
     @PutMapping("/{id}")
-    public Sancion update(@PathVariable Long id, @RequestBody Sancion sancion) {
-        if (!sancionService.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sancion no encontrada");
+    public ResponseEntity<Sancion> actualizar(@PathVariable Long id, @RequestBody Sancion sancion) {
+        try {
+            return ResponseEntity.ok(sancionService.actualizar(id, sancion));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
-        sancion.setId(id);
-        return sancionService.save(sancion);
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        if (!sancionService.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sancion no encontrada");
-        }
-        sancionService.deleteById(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        sancionService.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 }

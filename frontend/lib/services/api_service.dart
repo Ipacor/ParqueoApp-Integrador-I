@@ -1,31 +1,48 @@
-/*import 'dart:convert';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/usuario.dart';
+import '../models/user.dart';
 
 class ApiService {
-  // Cambiar localhost por 10.0.2.2 para el emulador Android
+  // Cambia localhost por 10.0.2.2 para el emulador Android
   static const String baseUrl = 'http://10.0.2.2:8080/api/usuarios';
 
-  Future<List<Usuario>> getUsuarios() async {
+  Future<List<User>> getUsuarios() async {
     final response = await http.get(Uri.parse(baseUrl));
     if (response.statusCode == 200) {
       final List<dynamic> listaJson = json.decode(response.body);
-      return listaJson.map((json) => Usuario.fromJson(json)).toList();
+      return listaJson.map((json) => User.fromJson(json)).toList();
     } else {
       throw Exception('Error al obtener usuarios: ${response.statusCode}');
     }
   }
 
-  Future<Usuario> crearUsuario(Usuario usuario) async {
+  Future<User> crearUsuario(User usuario) async {
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(usuario.toJson()),
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return Usuario.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(response.body));
     } else {
       throw Exception('Error al crear usuario: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<User> login(String username, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'username': username, 'password': password}),
+    );
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));
+    } else if (response.statusCode == 401) {
+      throw Exception('Contraseña incorrecta');
+    } else if (response.statusCode == 404) {
+      throw Exception('Usuario no encontrado');
+    } else {
+      throw Exception('Error en login: ${response.statusCode}');
     }
   }
 
@@ -36,16 +53,16 @@ class ApiService {
     }
   }
 
-  Future<Usuario> actualizarUsuario(Usuario usuario) async {
+  Future<User> actualizarUsuario(User usuario) async {
     final response = await http.put(
       Uri.parse('$baseUrl/${usuario.id}'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(usuario.toJson()),
     );
     if (response.statusCode == 200) {
-      return Usuario.fromJson(json.decode(response.body));
+      return User.fromJson(json.decode(response.body));
     } else {
       throw Exception('Error al actualizar usuario: ${response.statusCode}');
     }
   }
-}*/
+}

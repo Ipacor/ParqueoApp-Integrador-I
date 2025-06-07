@@ -6,18 +6,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SancionService {
-
-    List<Sancion> findAll();
-
-    Optional<Sancion> findById(Long id);
-
-    List<Sancion> findByUsuarioId(Long usuarioId);
-
-    List<Sancion> findByEstado(String estado);
-
-    Sancion save(Sancion sancion);
-
-    void deleteById(Long id);
-
-    boolean existsById(Long id);
+    List<Sancion> listarTodas();
+    Optional<Sancion> buscarPorId(Long id);
+    List<Sancion> listarPorUsuarioId(Long usuarioId);
+    Sancion guardar(Sancion sancion);
+    Sancion actualizar(Long id, Sancion sancionActualizada);
+    void eliminar(Long id);
 }

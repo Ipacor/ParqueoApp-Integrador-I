@@ -3,6 +3,7 @@ package com.parqueo.parkingApp.controller;
 import com.parqueo.parkingApp.model.Reserva;
 import com.parqueo.parkingApp.service.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,46 +18,33 @@ public class ReservaController {
     private ReservaService reservaService;
 
     @GetMapping
-    public List<Reserva> getAll() {
-        return reservaService.findAll();
+    public List<Reserva> listar() {
+        return reservaService.listarReservas();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Reserva> getById(@PathVariable Long id) {
-        Optional<Reserva> reserva = reservaService.findById(id);
-        return reserva.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/usuario/{usuarioId}")
-    public List<Reserva> getByUsuario(@PathVariable Long usuarioId) {
-        return reservaService.findByUsuarioId(usuarioId);
-    }
-
-    @GetMapping("/estado/{estado}")
-    public List<Reserva> getByEstado(@PathVariable String estado) {
-        return reservaService.findByEstado(estado);
+    public ResponseEntity<Reserva> obtenerPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(reservaService.obtenerReservaPorId(id));
     }
 
     @PostMapping
-    public Reserva create(@RequestBody Reserva reserva) {
-        return reservaService.save(reserva);
+    public ResponseEntity<Reserva> crear(@RequestBody Reserva reserva) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservaService.crearReserva(reserva));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Reserva> update(@PathVariable Long id, @RequestBody Reserva reserva) {
-        if (!reservaService.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        reserva.setId(id);
-        return ResponseEntity.ok(reservaService.save(reserva));
+    public ResponseEntity<Reserva> actualizar(@PathVariable Long id, @RequestBody Reserva reserva) {
+        return ResponseEntity.ok(reservaService.actualizarReserva(id, reserva));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (!reservaService.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        reservaService.deleteById(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        reservaService.eliminarReserva(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/usuario/{idUsuario}")
+    public List<Reserva> reservasPorUsuario(@PathVariable Long idUsuario) {
+        return reservaService.listarReservasPorUsuario(idUsuario);
     }
 }

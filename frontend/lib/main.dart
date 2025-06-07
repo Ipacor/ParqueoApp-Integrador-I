@@ -1,133 +1,36 @@
-/*import 'package:flutter/material.dart';
-import 'models/usuario.dart';
+import 'package:flutter/material.dart';
+import 'package:frontend/models/user.dart';
+import 'models/user.dart';
 import 'services/api_service.dart';
 
 void main() {
-  runApp(ParqueoApp());
+  runApp(MyApp());
 }
 
-class ParqueoApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ParqueoApp',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: LoginScreen(),
+      debugShowCheckedModeBanner: false,
+      home: UserLoginPage(),
     );
   }
 }
 
-// Pantalla Login
-class LoginScreen extends StatefulWidget {
+class UserLoginPage extends StatefulWidget {
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _UserLoginPageState createState() => _UserLoginPageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _UserLoginPageState extends State<UserLoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final ApiService _apiService = ApiService();
 
   bool _isLoading = false;
   String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _verificarUsuarios();
-  }
-
-  void _verificarUsuarios() async {
-    final usuarios = await _apiService.getUsuarios();
-    if (usuarios.isEmpty) {
-      Future.delayed(Duration.zero, () => _mostrarFormularioRegistroInicial());
-    }
-  }
-
-  void _mostrarFormularioRegistroInicial() {
-    final _formKey = GlobalKey<FormState>();
-    final _usernameController = TextEditingController();
-    final _passwordController = TextEditingController();
-    final _nombreController = TextEditingController();
-    final _emailController = TextEditingController();
-    String _rolSeleccionado = 'ADMIN';
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return WillPopScope(
-          onWillPop: () async {
-            return false;
-          },
-          child: AlertDialog(
-            title: Text('Registro Inicial (Administrador)'),
-            content: Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _usernameController,
-                      decoration: InputDecoration(labelText: 'Usuario'),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Campo requerido' : null,
-                    ),
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(labelText: 'Contraseña'),
-                      obscureText: true,
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Campo requerido' : null,
-                    ),
-                    TextFormField(
-                      controller: _nombreController,
-                      decoration: InputDecoration(labelText: 'Nombre Completo'),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Campo requerido' : null,
-                    ),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: InputDecoration(labelText: 'Email'),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Campo requerido' : null,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    try {
-                      final nuevoUsuario = Usuario(
-                        username: _usernameController.text.trim(),
-                        password: _passwordController.text,
-                        nombreCompleto: _nombreController.text.trim(),
-                        email: _emailController.text.trim(),
-                        rol: _rolSeleccionado,
-                      );
-                      await _apiService.crearUsuario(nuevoUsuario);
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Usuario creado. Ahora inicia sesión.')),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error al crear usuario: $e')),
-                      );
-                    }
-                  }
-                },
-                child: Text('Registrar'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   void _login() async {
     final username = _usernameController.text.trim();
@@ -149,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final usuarios = await _apiService.getUsuarios();
       final usuarioEncontrado = usuarios.firstWhere(
         (u) => u.username == username,
-        orElse: () => Usuario(
+        orElse: () => User(
           id: null,
           username: '',
           password: '',
@@ -176,17 +79,17 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       if (usuarioEncontrado.rol.toUpperCase() == 'ADMIN') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => AdminScreen(usuarioActual: usuarioEncontrado)),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UsuarioScreen()),
-        );
+        setState(() {
+          _errorMessage = 'Use la opción de Administrador para ingresar.';
+          _isLoading = false;
+        });
+        return;
       }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => UsuarioScreen()),
+      );
     } catch (e) {
       setState(() {
         _errorMessage = 'Error de conexión: $e';
@@ -195,35 +98,294 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _goToRegister() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UserRegisterPage()),
+    );
+  }
+
+  void _goToAdminLogin() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AdminLoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("lib/assets/parking_background.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.black.withOpacity(0.5),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'INICIA SESIÓN',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Ingresa tus datos para',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    Text(
+                      'Continuar',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.orangeAccent,
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    TextField(
+                      controller: _usernameController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Usuario',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.orange,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Contraseña',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.orange,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    _isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            onPressed: _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              'Iniciar Sesión',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                    SizedBox(height: 10),
+                    TextButton(
+                      onPressed: _goToRegister,
+                      child: Text(
+                        'Registrarse',
+                        style: TextStyle(
+                          color: Colors.orangeAccent,
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: IconButton(
+                        icon: Icon(Icons.admin_panel_settings),
+                        color: Colors.white,
+                        iconSize: 40,
+                        tooltip: 'Ingreso Administrador',
+                        onPressed: _goToAdminLogin,
+                      ),
+                    ),
+                    if (_errorMessage != null) ...[
+                      SizedBox(height: 20),
+                      Text(
+                        _errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                    SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class UserRegisterPage extends StatefulWidget {
+  @override
+  _UserRegisterPageState createState() => _UserRegisterPageState();
+}
+
+class _UserRegisterPageState extends State<UserRegisterPage> {
+  final _formKey = GlobalKey<FormState>();
+  final ApiService _apiService = ApiService();
+
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  String _rolSeleccionado = 'estudiante';
+  bool _isRegistering = false;
+  String? _errorMessage;
+
+  final List<String> roles = [
+    'estudiante',
+    'docente',
+    'proveedor de servicios',
+    'vigilancia',
+  ];
+
+  void _register() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isRegistering = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final nuevoUsuario = User(
+        username: _usernameController.text.trim(),
+        password: _passwordController.text,
+        nombreCompleto: _nombreController.text.trim(),
+        email: _emailController.text.trim(),
+        rol: _rolSeleccionado,
+      );
+
+      await _apiService.crearUsuario(nuevoUsuario);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Usuario registrado exitosamente.')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error al registrar usuario: $e';
+      });
+    } finally {
+      setState(() {
+        _isRegistering = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Registro Usuario'),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Center(
-          child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
             child: Column(
               children: [
-                TextField(
+                TextFormField(
                   controller: _usernameController,
                   decoration: InputDecoration(labelText: 'Usuario'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Campo requerido' : null,
                 ),
                 SizedBox(height: 16),
-                TextField(
+                TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
                   decoration: InputDecoration(labelText: 'Contraseña'),
+                  obscureText: true,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Campo requerido' : null,
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: _nombreController,
+                  decoration: InputDecoration(labelText: 'Nombre Completo'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Campo requerido' : null,
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(labelText: 'Email'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Campo requerido' : null,
+                ),
+                SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _rolSeleccionado,
+                  items: roles
+                      .map((rol) => DropdownMenuItem(
+                            value: rol,
+                            child: Text(rol[0].toUpperCase() + rol.substring(1)),
+                          ))
+                      .toList(),
+                  onChanged: (valor) {
+                    setState(() {
+                      _rolSeleccionado = valor!;
+                    });
+                  },
+                  decoration: InputDecoration(labelText: 'Rol'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Seleccione un rol' : null,
                 ),
                 SizedBox(height: 24),
-                _isLoading
+                _isRegistering
                     ? CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: _login,
-                        child: Text('Ingresar'),
+                        onPressed: _register,
+                        child: Text('Registrarse'),
                       ),
                 if (_errorMessage != null) ...[
-                  SizedBox(height: 20),
+                  SizedBox(height: 16),
                   Text(
                     _errorMessage!,
                     style: TextStyle(color: Colors.red),
@@ -238,9 +400,198 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// Pantalla Admin - CRUD COMPLETO
+class AdminLoginPage extends StatefulWidget {
+  @override
+  _AdminLoginPageState createState() => _AdminLoginPageState();
+}
+
+class _AdminLoginPageState extends State<AdminLoginPage> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final ApiService _apiService = ApiService();
+
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  void _login() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    if (username.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Por favor ingresa usuario y contraseña';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final usuarios = await _apiService.getUsuarios();
+      final usuarioEncontrado = usuarios.firstWhere(
+        (u) => u.username == username && u.rol.toUpperCase() == 'ADMIN',
+        orElse: () => User(
+          id: null,
+          username: '',
+          password: '',
+          nombreCompleto: '',
+          email: '',
+          rol: '',
+        ),
+      );
+
+      if (usuarioEncontrado.username == '') {
+        setState(() {
+          _errorMessage = 'Administrador no encontrado';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      if (password != usuarioEncontrado.password) {
+        setState(() {
+          _errorMessage = 'Contraseña incorrecta';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => AdminScreen(usuarioActual: usuarioEncontrado)),
+      );
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error de conexión: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("lib/assets/parking_background.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.black.withOpacity(0.5),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'ADMINISTRADOR',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Ingrese sus credenciales',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    TextField(
+                      controller: _usernameController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Usuario',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.orange,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Contraseña',
+                        hintStyle: TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.orange,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    _isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            onPressed: _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              'Iniciar Sesión',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                    if (_errorMessage != null) ...[
+                      SizedBox(height: 20),
+                      Text(
+                        _errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                    SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class AdminScreen extends StatefulWidget {
-  final Usuario usuarioActual;
+  final User usuarioActual;
 
   AdminScreen({required this.usuarioActual});
 
@@ -250,14 +601,21 @@ class AdminScreen extends StatefulWidget {
 
 class _AdminScreenState extends State<AdminScreen> {
   final ApiService apiService = ApiService();
-  late Future<List<Usuario>> usuariosFuture;
+  late Future<List<User>> usuariosFuture;
 
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nombreController = TextEditingController();
   final _emailController = TextEditingController();
-  String _rolSeleccionado = 'USUARIO';
+  String _rolSeleccionado = 'estudiante';
+
+  final List<String> roles = [
+    'estudiante',
+    'docente',
+    'proveedor de servicios',
+    'vigilancia',
+  ];
 
   @override
   void initState() {
@@ -276,20 +634,19 @@ class _AdminScreenState extends State<AdminScreen> {
     _passwordController.clear();
     _nombreController.clear();
     _emailController.clear();
-    _rolSeleccionado = 'USUARIO';
+    _rolSeleccionado = roles[0];
   }
 
   void _logout() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => AdminLoginPage()),
       (route) => false,
     );
   }
 
-  // CREATE - Crear nuevo usuario
   void _mostrarFormularioCrearUsuario() {
-    _clearForm(); // Limpiar formulario antes de mostrar
+    _clearForm();
     showDialog(
       context: context,
       builder: (context) {
@@ -354,10 +711,10 @@ class _AdminScreenState extends State<AdminScreen> {
                       SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         value: _rolSeleccionado,
-                        items: ['ADMIN', 'USUARIO']
+                        items: roles
                             .map((rol) => DropdownMenuItem(
                                   value: rol,
-                                  child: Text(rol),
+                                  child: Text(rol[0].toUpperCase() + rol.substring(1)),
                                 ))
                             .toList(),
                         onChanged: (valor) {
@@ -386,7 +743,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       try {
-                        final nuevoUsuario = Usuario(
+                        final nuevoUsuario = User(
                           username: _usernameController.text.trim(),
                           password: _passwordController.text,
                           nombreCompleto: _nombreController.text.trim(),
@@ -423,13 +780,27 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  // UPDATE - Editar usuario existente
-  void _editarUsuario(Usuario usuario) {
+  void _mostrarFormularioEditarUsuario(User usuario) {
     _usernameController.text = usuario.username;
     _passwordController.text = usuario.password;
     _nombreController.text = usuario.nombreCompleto;
     _emailController.text = usuario.email;
-    _rolSeleccionado = usuario.rol;
+
+    final bool esAdminActual = usuario.id == widget.usuarioActual.id;
+
+    // Preparación lista de roles y valor para DropdownButton
+    String rolActualLower = usuario.rol.toLowerCase();
+    List<String> currentRoles = List.from(roles);
+    if (esAdminActual && rolActualLower != 'admin') {
+      rolActualLower = 'admin';
+      if (!currentRoles.contains('admin')) {
+        currentRoles.add('admin');
+      }
+    } else if (!currentRoles.contains(rolActualLower)) {
+      currentRoles.add(rolActualLower);
+    }
+
+    _rolSeleccionado = rolActualLower;
 
     showDialog(
       context: context,
@@ -495,17 +866,19 @@ class _AdminScreenState extends State<AdminScreen> {
                       SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         value: _rolSeleccionado,
-                        items: ['ADMIN', 'USUARIO']
+                        items: currentRoles
                             .map((rol) => DropdownMenuItem(
                                   value: rol,
-                                  child: Text(rol),
+                                  child: Text(rol[0].toUpperCase() + rol.substring(1)),
                                 ))
                             .toList(),
-                        onChanged: (valor) {
-                          setDialogState(() {
-                            _rolSeleccionado = valor!;
-                          });
-                        },
+                        onChanged: esAdminActual
+                            ? null
+                            : (valor) {
+                                setDialogState(() {
+                                  _rolSeleccionado = valor!;
+                                });
+                              },
                         decoration: InputDecoration(
                           labelText: 'Rol',
                           prefixIcon: Icon(Icons.admin_panel_settings),
@@ -527,13 +900,15 @@ class _AdminScreenState extends State<AdminScreen> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       try {
-                        final usuarioActualizado = Usuario(
+                        final usuarioActualizado = User(
                           id: usuario.id,
                           username: _usernameController.text.trim(),
                           password: _passwordController.text,
                           nombreCompleto: _nombreController.text.trim(),
                           email: _emailController.text.trim(),
-                          rol: _rolSeleccionado,
+                          rol: _rolSeleccionado.toUpperCase() == 'ADMIN'
+                              ? 'ADMIN'
+                              : _rolSeleccionado,
                         );
                         await apiService.actualizarUsuario(usuarioActualizado);
                         _refreshUsuarios();
@@ -565,9 +940,14 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  // DELETE - Eliminar usuario
-  void _eliminarUsuario(Usuario usuario) async {
-    // Confirmación antes de eliminar
+  void _editarUsuario(User usuario) {
+    _mostrarFormularioEditarUsuario(usuario);
+  }
+
+  void _eliminarUsuario(User usuario) async {
+    final bool esAdminActual = usuario.id == widget.usuarioActual.id;
+    if (esAdminActual) return;
+
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -612,8 +992,7 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
-  // Ver detalles del usuario
-  void _verDetallesUsuario(Usuario usuario) {
+  void _verDetallesUsuario(User usuario) {
     showDialog(
       context: context,
       builder: (context) {
@@ -666,7 +1045,7 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin - ${widget.usuarioActual.nombreCompleto}'),
+        title: Text('Administrador - ${widget.usuarioActual.nombreCompleto}'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
@@ -684,7 +1063,6 @@ class _AdminScreenState extends State<AdminScreen> {
       ),
       body: Column(
         children: [
-          // Header con información
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(16),
@@ -699,9 +1077,8 @@ class _AdminScreenState extends State<AdminScreen> {
               textAlign: TextAlign.center,
             ),
           ),
-          // Lista de usuarios
           Expanded(
-            child: FutureBuilder<List<Usuario>>(
+            child: FutureBuilder<List<User>>(
               future: usuariosFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -725,7 +1102,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   );
                 }
                 final usuarios = snapshot.data ?? [];
-                
+
                 if (usuarios.isEmpty) {
                   return Center(
                     child: Column(
@@ -752,19 +1129,21 @@ class _AdminScreenState extends State<AdminScreen> {
                   itemCount: usuarios.length,
                   itemBuilder: (context, index) {
                     final usuario = usuarios[index];
+                    final bool esAdminActual = usuario.id == widget.usuarioActual.id;
+
                     return Card(
                       margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: usuario.rol == 'ADMIN' 
-                              ? Colors.red.shade100 
+                          backgroundColor: usuario.rol.toUpperCase() == 'ADMIN'
+                              ? Colors.red.shade100
                               : Colors.blue.shade100,
                           child: Icon(
-                            usuario.rol == 'ADMIN' 
-                                ? Icons.admin_panel_settings 
+                            usuario.rol.toUpperCase() == 'ADMIN'
+                                ? Icons.admin_panel_settings
                                 : Icons.person,
-                            color: usuario.rol == 'ADMIN' 
-                                ? Colors.red.shade700 
+                            color: usuario.rol.toUpperCase() == 'ADMIN'
+                                ? Colors.red.shade700
                                 : Colors.blue.shade700,
                           ),
                         ),
@@ -779,8 +1158,8 @@ class _AdminScreenState extends State<AdminScreen> {
                             Text(
                               usuario.rol,
                               style: TextStyle(
-                                color: usuario.rol == 'ADMIN' 
-                                    ? Colors.red 
+                                color: usuario.rol.toUpperCase() == 'ADMIN'
+                                    ? Colors.red
                                     : Colors.blue,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -797,42 +1176,51 @@ class _AdminScreenState extends State<AdminScreen> {
                                 _editarUsuario(usuario);
                                 break;
                               case 'eliminar':
-                                _eliminarUsuario(usuario);
+                                if (!esAdminActual) {
+                                  _eliminarUsuario(usuario);
+                                }
                                 break;
                             }
                           },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'ver',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.visibility, color: Colors.blue),
-                                  SizedBox(width: 8),
-                                  Text('Ver detalles'),
-                                ],
+                          itemBuilder: (context) {
+                            List<PopupMenuEntry<String>> items = [
+                              PopupMenuItem(
+                                value: 'ver',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.visibility, color: Colors.blue),
+                                    SizedBox(width: 8),
+                                    Text('Ver detalles'),
+                                  ],
+                                ),
                               ),
-                            ),
-                            PopupMenuItem(
-                              value: 'editar',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit, color: Colors.orange),
-                                  SizedBox(width: 8),
-                                  Text('Editar'),
-                                ],
+                              PopupMenuItem(
+                                value: 'editar',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.edit, color: Colors.orange),
+                                    SizedBox(width: 8),
+                                    Text('Editar'),
+                                  ],
+                                ),
                               ),
-                            ),
-                            PopupMenuItem(
-                              value: 'eliminar',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete, color: Colors.red),
-                                  SizedBox(width: 8),
-                                  Text('Eliminar'),
-                                ],
-                              ),
-                            ),
-                          ],
+                            ];
+                            if (!esAdminActual) {
+                              items.add(
+                                PopupMenuItem(
+                                  value: 'eliminar',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.delete, color: Colors.red),
+                                      SizedBox(width: 8),
+                                      Text('Eliminar'),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                            return items;
+                          },
                         ),
                         onTap: () => _verDetallesUsuario(usuario),
                       ),
@@ -855,7 +1243,6 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 }
 
-// Pantalla Usuario común
 class UsuarioScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -867,11 +1254,12 @@ class UsuarioScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+                MaterialPageRoute(builder: (context) => UserLoginPage()),
                 (route) => false,
               );
             },
             icon: Icon(Icons.logout),
+            tooltip: 'Cerrar sesión',
           ),
         ],
       ),
@@ -895,4 +1283,4 @@ class UsuarioScreen extends StatelessWidget {
       ),
     );
   }
-}*/
+}

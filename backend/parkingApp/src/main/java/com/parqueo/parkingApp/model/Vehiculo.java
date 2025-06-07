@@ -2,6 +2,8 @@ package com.parqueo.parkingApp.model;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -20,10 +22,11 @@ public class Vehiculo {
 
     private String color;
 
-    private String tipo; // <-- Campo agregado
+    private String tipo; 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonBackReference
     private Usuario usuario;
 
     @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -7,49 +7,41 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EspacioDisponibleServiceImpl implements EspacioDisponibleService {
 
     @Autowired
-    private EspacioDisponibleRepository espacioDisponibleRepository;
+    private EspacioDisponibleRepository espacioRepository;
 
     @Override
-    public List<EspacioDisponible> findAll() {
-        return espacioDisponibleRepository.findAll();
+    public List<EspacioDisponible> listarEspacios() {
+        return espacioRepository.findAll();
     }
 
     @Override
-    public Optional<EspacioDisponible> findById(Long id) {
-        return espacioDisponibleRepository.findById(id);
+    public EspacioDisponible obtenerEspacioPorId(Long id) {
+        return espacioRepository.findById(id).orElse(null);
     }
 
     @Override
-    public List<EspacioDisponible> findByEstado(String estado) {
-        return espacioDisponibleRepository.findByEstado(estado);
-    }
-
-
-
-    @Override
-    public EspacioDisponible save(EspacioDisponible espacioDisponible) {
-        return espacioDisponibleRepository.save(espacioDisponible);
+    public EspacioDisponible crearEspacio(EspacioDisponible espacio) {
+        return espacioRepository.save(espacio);
     }
 
     @Override
-    public void deleteById(Long id) {
-        espacioDisponibleRepository.deleteById(id);
+    public EspacioDisponible actualizarEspacio(Long id, EspacioDisponible espacioActualizado) {
+        EspacioDisponible espacio = espacioRepository.findById(id).orElse(null);
+        if (espacio != null) {
+            espacio.setUbicacion(espacioActualizado.getUbicacion());
+            espacio.setEstado(espacioActualizado.getEstado());
+            return espacioRepository.save(espacio);
+        }
+        return null;
     }
 
     @Override
-    public boolean existsById(Long id) {
-        return espacioDisponibleRepository.existsById(id);
-    }
-
-    @Override
-    public List<EspacioDisponible> findByTipo(String tipo) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByTipo'");
+    public void eliminarEspacio(Long id) {
+        espacioRepository.deleteById(id);
     }
 }
