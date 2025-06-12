@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/admin_screen.dart';
+import 'package:frontend/screens/user_login_page.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/models/user.dart';
 import 'admin_login_page.dart';
@@ -172,6 +173,18 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: Icon(Icons.arrow_forward, color: Colors.white),
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => UserLoginPage()),
+                                );
+                              },
                             ),
                           ),
                     if (_errorMessage != null) ...[

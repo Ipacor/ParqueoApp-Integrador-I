@@ -28,7 +28,7 @@ public class UsuarioService {
     public Usuario save(Usuario usuario) {
         boolean esNuevo = (usuario.getId() == null);
 
-        /*if ("ADMIN".equalsIgnoreCase(usuario.getRol())) {
+        if ("ADMIN".equalsIgnoreCase(usuario.getRol())) {
             Optional<Usuario> adminExistente = usuarioRepository.findByUsername(usuario.getUsername());
 
             if (esNuevo && usuarioRepository.existsByRol("ADMIN")) {
@@ -41,7 +41,7 @@ public class UsuarioService {
                     throw new RuntimeException("Ya existe un administrador en el sistema.");
                 }
             }
-        }*/
+        }
 
         return usuarioRepository.save(usuario);
     }

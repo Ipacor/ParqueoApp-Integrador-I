@@ -474,6 +474,49 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
         ],
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Menú',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('Inicio'),
+              onTap: () {
+                // Navegar a la pantalla de inicio
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Configuraciones'),
+              onTap: () {
+                // Navegar a la pantalla de configuraciones
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('Acerca de'),
+              onTap: () {
+                // Navegar a la pantalla de acerca de
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Container(
