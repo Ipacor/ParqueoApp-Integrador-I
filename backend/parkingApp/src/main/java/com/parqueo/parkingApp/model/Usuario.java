@@ -38,6 +38,9 @@ public class Usuario {
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private SeguridadSistema seguridad;
 
+   @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ReglasEstacionamiento reglaEstacionamiento;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Sancion> sanciones;
 
@@ -114,5 +117,13 @@ public class Usuario {
     public String toString() {
         return "Usuario [id=" + id + ", username=" + username + ", password=" + password + ", nombreCompleto="
                 + nombreCompleto + ", email=" + email + ", rol=" + rol + ", vehiculos=" + vehiculos + "]";
+    }
+
+    public enum Rol {
+        ADMINISTRADOR,
+        ESTUDIANTE,
+        DOCENTE,
+        PROVEEDOR_SERVICIO,
+        VIGILANTE,
     }
 }

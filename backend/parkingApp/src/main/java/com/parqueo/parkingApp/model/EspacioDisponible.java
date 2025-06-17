@@ -14,9 +14,11 @@ public class EspacioDisponible {
 
     private String ubicacion;
 
+    private String movil;
+
     private String estado;
 
-     // Relación con Reserva: 1 espacio puede tener muchas reservas
+    // Relación con Reserva: 1 espacio puede tener muchas reservas
     @OneToMany(mappedBy = "espacio", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Reserva> reservas;
 
@@ -38,6 +40,14 @@ public class EspacioDisponible {
         this.ubicacion = ubicacion;
     }
 
+    public String getMovil() {
+        return movil;
+    }
+
+    public void setMovil(String movil) {
+        this.movil = movil;
+    }
+
     public String getEstado() {
         return estado;
     }
@@ -46,21 +56,26 @@ public class EspacioDisponible {
         this.estado = estado;
     }
 
-    public EspacioDisponible() {
+    public Set<Reserva> getReservas() {
+        return reservas;
     }
 
-    public EspacioDisponible(Long id, String ubicacion, String estado) {
+    public void setReservas(Set<Reserva> reservas) {
+        this.reservas = reservas;
+    }
+
+    public EspacioDisponible(Long id, String ubicacion, String movil, String estado, Set<Reserva> reservas) {
         this.id = id;
         this.ubicacion = ubicacion;
+        this.movil = movil;
         this.estado = estado;
+        this.reservas = reservas;
     }
 
     @Override
     public String toString() {
-        return "EspacioDisponible{" +
-                "id=" + id +
-                ", ubicacion='" + ubicacion + '\'' +
-                ", estado='" + estado + '\'' +
-                '}';
+        return "EspacioDisponible [id=" + id + ", ubicacion=" + ubicacion + ", movil=" + movil + ", estado=" + estado
+                + ", reservas=" + reservas + "]";
     }
+
 }

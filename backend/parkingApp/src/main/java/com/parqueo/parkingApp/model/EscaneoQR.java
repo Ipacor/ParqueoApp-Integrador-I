@@ -11,8 +11,9 @@ public class EscaneoQR {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-  @ManyToOne(optional = false)
-    @JoinColumn(name = "reserva_id")
+   // Uno a uno con Reserva
+    @OneToOne
+    @JoinColumn(name = "id_reserva", nullable = false)
     private Reserva reserva;
 
 

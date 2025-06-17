@@ -22,7 +22,7 @@ public class Vehiculo {
 
     private String color;
 
-    private String tipo; 
+    private String tipo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -32,7 +32,11 @@ public class Vehiculo {
     @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Reserva> reservas;
 
-    // Getters y setters
+      @OneToOne(mappedBy = "vehiculo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ReglasEstacionamiento reglasEstacionamiento;
+
+    @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Sancion> sanciones;
 
     public Long getId() {
         return id;
@@ -98,12 +102,27 @@ public class Vehiculo {
         this.reservas = reservas;
     }
 
-    // Constructores
+    public ReglasEstacionamiento getReglasEstacionamiento() {
+        return reglasEstacionamiento;
+    }
+
+    public void setReglasEstacionamiento(ReglasEstacionamiento reglasEstacionamiento) {
+        this.reglasEstacionamiento = reglasEstacionamiento;
+    }
+
+    public Set<Sancion> getSanciones() {
+        return sanciones;
+    }
+
+    public void setSanciones(Set<Sancion> sanciones) {
+        this.sanciones = sanciones;
+    }
 
     public Vehiculo() {
     }
 
-    public Vehiculo(Long id, String placa, String modelo, String marca, String color, String tipo, Usuario usuario) {
+    public Vehiculo(Long id, String placa, String modelo, String marca, String color, String tipo, Usuario usuario,
+            Set<Reserva> reservas, ReglasEstacionamiento reglasEstacionamiento, Set<Sancion> sanciones) {
         this.id = id;
         this.placa = placa;
         this.modelo = modelo;
@@ -111,11 +130,16 @@ public class Vehiculo {
         this.color = color;
         this.tipo = tipo;
         this.usuario = usuario;
+        this.reservas = reservas;
+        this.reglasEstacionamiento = reglasEstacionamiento;
+        this.sanciones = sanciones;
     }
 
     @Override
     public String toString() {
         return "Vehiculo [id=" + id + ", placa=" + placa + ", modelo=" + modelo + ", marca=" + marca + ", color="
-                + color + ", tipo=" + tipo + ", usuario=" + usuario + "]";
+                + color + ", tipo=" + tipo + ", usuario=" + usuario + ", reservas=" + reservas
+                + ", reglasEstacionamiento=" + reglasEstacionamiento + ", sanciones=" + sanciones + "]";
     }
+
 }

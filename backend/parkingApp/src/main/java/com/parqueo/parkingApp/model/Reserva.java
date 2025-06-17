@@ -12,20 +12,24 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    // Muchos a uno con Usuario
+    @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "vehiculo_id", nullable = false)
+    // Muchos a uno con Vehiculo
+    @ManyToOne
+    @JoinColumn(name = "id_vehiculo", nullable = false)
     private Vehiculo vehiculo;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "espacio_id", nullable = false)
+    // Muchos a uno con Espacio
+    @ManyToOne
+    @JoinColumn(name = "id_espacio", nullable = false)
     private EspacioDisponible espacio;
 
-    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<EscaneoQR> escaneos;
+    // Uno a uno con Escaneo QR (bidireccional)
+    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL)
+    private EscaneoQR escaneoQR;
 
     @Column(name = "fecha_hora_inicio", nullable = false)
     private LocalDateTime fechaHoraInicio;
@@ -42,17 +46,17 @@ public class Reserva {
         // Constructor vacío requerido por JPA
     }
 
-    public Reserva(Usuario usuario, EspacioDisponible espacio, Vehiculo vehiculo,
-                   LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, String estado) {
+    public Reserva(Long id, Usuario usuario, Vehiculo vehiculo, EspacioDisponible espacio, EscaneoQR escaneoQR,
+            LocalDateTime fechaHoraInicio, LocalDateTime fechaHoraFin, String estado) {
+        this.id = id;
         this.usuario = usuario;
-        this.espacio = espacio;
         this.vehiculo = vehiculo;
+        this.espacio = espacio;
+        this.escaneoQR = escaneoQR;
         this.fechaHoraInicio = fechaHoraInicio;
         this.fechaHoraFin = fechaHoraFin;
         this.estado = estado;
     }
-
-    // === Getters y Setters ===
 
     public Long getId() {
         return id;
@@ -86,6 +90,14 @@ public class Reserva {
         this.espacio = espacio;
     }
 
+    public EscaneoQR getEscaneoQR() {
+        return escaneoQR;
+    }
+
+    public void setEscaneoQR(EscaneoQR escaneoQR) {
+        this.escaneoQR = escaneoQR;
+    }
+
     public LocalDateTime getFechaHoraInicio() {
         return fechaHoraInicio;
     }
@@ -110,26 +122,11 @@ public class Reserva {
         this.estado = estado;
     }
 
-    public Set<EscaneoQR> getEscaneos() {
-        return escaneos;
-    }
-
-    public void setEscaneos(Set<EscaneoQR> escaneos) {
-        this.escaneos = escaneos;
-    }
-
-    // === toString ===
-
     @Override
     public String toString() {
-        return "Reserva{" +
-                "id=" + id +
-                ", usuario=" + usuario +
-                ", vehiculo=" + vehiculo +
-                ", espacio=" + espacio +
-                ", fechaHoraInicio=" + fechaHoraInicio +
-                ", fechaHoraFin=" + fechaHoraFin +
-                ", estado='" + estado + '\'' +
-                '}';
+        return "Reserva [id=" + id + ", usuario=" + usuario + ", vehiculo=" + vehiculo + ", espacio=" + espacio
+                + ", escaneoQR=" + escaneoQR + ", fechaHoraInicio=" + fechaHoraInicio + ", fechaHoraFin=" + fechaHoraFin
+                + ", estado=" + estado + "]";
     }
+
 }
