@@ -71,6 +71,9 @@ public class EspacioDisponible {
         this.estado = estado;
         this.reservas = reservas;
     }
+    public EspacioDisponible() {
+        // Constructor por defecto
+    }
 
     @Override
     public String toString() {
